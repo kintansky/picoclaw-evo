@@ -172,6 +172,7 @@ type SessionManager struct {
 	mu       sync.RWMutex
 	sessions map[string]*ProcessSession
 	stopCh   chan struct{}
+	stopOnce sync.Once
 }
 
 func NewSessionManager() *SessionManager {
@@ -197,16 +198,13 @@ func NewSessionManager() *SessionManager {
 	return sm
 }
 
-// Stop shuts down the background cleanup goroutine. Safe to call multiple times.
-// After Stop returns, the SessionManager is still usable — only the cleanup
-// goroutine is terminated.
+// Stop shuts down the background cleanup goroutine. Safe to call multiple
+// times from concurrent goroutines. After Stop returns, the SessionManager
+// is still usable — only the cleanup goroutine is terminated.
 func (sm *SessionManager) Stop() {
-	select {
-	case <-sm.stopCh:
-		// already closed
-	default:
+	sm.stopOnce.Do(func() {
 		close(sm.stopCh)
-	}
+	})
 }
 
 // cleanupOldSessions removes sessions that are done and older than 30 minutes
