@@ -125,6 +125,10 @@ Entries can be either a channel name or a channel plus chat id:
 - `telegram:1234567890` allows command jobs only from that exact Telegram chat id.
 - `*` allows command jobs from every non-empty channel.
 
+Warning: `*` is potentially dangerous because any remote channel that can talk
+to PicoClaw can schedule shell commands. Use it only when every enabled remote
+channel and chat is trusted to request command execution.
+
 This setting only controls the remote-channel gate. It does not bypass `tools.cron.allow_command`, `command_confirm`, `tools.exec.enabled`, or the exec tool's command safety checks.
 
 Example:
